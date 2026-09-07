@@ -1,6 +1,6 @@
 # Creator Preflight — QA Evidence
 
-Validated with Chrome DevTools MCP on September 3, 2026 against the public GitHub Pages deployment.
+Validated against the public GitHub Pages deployment; baseline captured September 3, 2026 and optimization re-audited September 8, 2026.
 
 ## Acceptance summary
 
@@ -17,6 +17,11 @@ Validated with Chrome DevTools MCP on September 3, 2026 against the public GitHu
 | Findings / Chapters / Release pack tabs | PASS |
 | Markdown release pack | PASS |
 | JSON export control present | PASS |
+| Native SRT import (file / drag / paste) | PASS |
+| Native VTT import | PASS |
+| Cue-tag + arrow stripping on import | PASS |
+| HTML-escape / XSS injection safety | PASS |
+| Favicon request (no console 404) | PASS |
 | Mobile 390×844 layout | PASS |
 | External analysis network dependency | NONE |
 
@@ -49,11 +54,42 @@ The demo generated these chapter markers:
 - 7:12 Mistake seven is skipping a final metadata
 - 8:08 The simplest fix is a repeatable checklist
 
+
+## Measured quality evidence
+
+Live Chrome audits against the public GitHub Pages deployment (desktop + mobile):
+
+| Metric | Desktop | Mobile 390×844 |
+| --- | --- | --- |
+| Lighthouse Accessibility | 100 | 100 |
+| Lighthouse Best Practices | 100 | 100 |
+| Lighthouse SEO | 100 | 100 |
+| Lighthouse Agentic Browsing | 100 | 100 |
+| Audits passed | 45/45 | 45/45 |
+| LCP (no throttle) | — | 152 ms |
+| TTFB | — | 3 ms |
+| CLS | — | 0.00 |
+
+## Import + edge-case tests
+
+A temporary headless-Chromium regression harness passed 26/26 assertions during the optimization pass:
+
+| Case | Result |
+| --- | --- |
+| Demo result stable (99 / 9 / 12 / 1) desktop + mobile | PASS |
+| .srt import → 4 cues, chapters generated, tags/arrows stripped | PASS |
+| .vtt import → header removed, first cue at 0:00 | PASS |
+| HH:MM:SS cue preserved (1:02:03) | PASS |
+| Comma-decimal SRT timestamps | PASS |
+| Empty / no-timestamp input → no crash, empty output | PASS |
+| Malicious title HTML → no dialog, no injected node | PASS |
+| Zero console errors across all regression cases | PASS |
+
 ## Network / console note
 
 The app itself has no runtime API or backend dependency. During the first Pages deployment test, GitHub Pages returned a temporary 404 while the deployment was building. After deployment, the document request returned HTTP 200.
 
-The only remaining browser-console 404 observed was the browser's optional request for `/favicon.ico`; this does not affect application functionality or analysis.
+The earlier optional `/favicon.ico` console 404 is resolved with an inline SVG favicon, so no favicon network request is made and the zero-external-request property is preserved.
 
 ## Privacy verification
 
